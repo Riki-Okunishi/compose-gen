@@ -29,7 +29,7 @@ You just call the function with the name of the key you want to add, and give it
 import "github.com/Riki-Okunishi/compose-gen/compose"
 
 func main() {
-    yml := compose.NewComposeFile("3.9")
+    yml := compose.NewComposeFile("3.5")
 
     yml.Service("app").Build("./build/path")
     yml.Service("app").Volumes("./volume1/local:./volume1/container", "./volume2/local:./volume2/container")
