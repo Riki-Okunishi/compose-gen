@@ -37,7 +37,6 @@ type composeFile struct {
 }
 
 type valueSyntax interface {
-	GetSyntaxType() string
 	String() string
 }
 

@@ -34,7 +34,6 @@ type portsLongSyntax struct {
 }
 
 type portsShortSyntax struct {
-	syntaxType string
 	ports      string
 }
 
@@ -220,10 +219,6 @@ func newPortsLongSyntax(arg map[string]interface{}) (*portsLongSyntax, error) {
 	return pls, nil
 }
 
-func (p *portsLongSyntax) GetSyntaxType() string {
-	return p.syntaxType
-}
-
 func (p *portsLongSyntax) String() string {
 	str := fmt.Sprintf("%starget: %d\n", indents[0], p.target)
 	str += fmt.Sprintf("%spublished: %d\n", indents[4], p.published)
@@ -237,10 +232,6 @@ func newPortsShortSyntax(ports string) (*portsShortSyntax, error) {
 	pss.ports = ports
 
 	return pss, nil
-}
-
-func (p *portsShortSyntax) GetSyntaxType() string {
-	return p.syntaxType
 }
 
 func (p *portsShortSyntax) String() string {
