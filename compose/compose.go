@@ -2,12 +2,27 @@ package compose
 
 import (
 	"fmt"
+	"os"
 )
 
-const defaultVersion string = "3.5"
+const (
+	defaultVersion string = "3.5"
+)
+
+var (
+	indents = []string{
+		"",
+		"  ",
+		"    ",
+		"      ",
+		"        ",
+	}
+)
 
 // ComposeFileEditor is model of docker-compose.yml in specific version
 type ComposeFileEditor interface {
+	String() string
+	GenerateFile(path string) error
 	GetVersion() string
 	Services(srv string) serviceEditor
 	Networks(nw string) networkEditor
@@ -20,6 +35,13 @@ type composeFile struct {
 	networks map[string]networkEditor
 	volumes  map[string]volumeEditor
 }
+
+type valueSyntax interface {
+	GetSyntaxType() string
+	String() string
+}
+
+var _ ComposeFileEditor = &composeFile{}
 
 // NewDefaultComposeFile returns composeFile object in default version
 func NewDefaultComposeFile() ComposeFileEditor {
@@ -35,11 +57,6 @@ func NewComposeFile(v string) ComposeFileEditor {
 		networks: map[string]networkEditor{},
 		volumes: map[string]volumeEditor{},
 	}
-}
-
-func (c *composeFile) String() string {
-	// TODO: define Stringer format
-	return fmt.Sprintf("version: %s\n", c.version)
 }
 
 // GetVersion returns this compose file version
@@ -75,4 +92,39 @@ func (c *composeFile) Volumes(vol string) volumeEditor {
 	v := newVolume(vol, c.version)
 	c.volumes[vol] = v
 	return v
+}
+
+func (c *composeFile) String() string {
+	// TODO: define String format
+	str := fmt.Sprintf("version: \"%s\"\n", c.version)
+	if len(c.services) != 0 {
+		str += "services:\n"
+		for _, s := range c.services {
+			str += s.String()
+		}
+	}
+	if len(c.networks) != 0 {
+		str += "networks:\n"
+		for _, n := range c.networks {
+			str += n.String()
+		}
+	}
+	if len(c.volumes) != 0 {
+		str += "volumes:\n"
+		for _, v := range c.volumes {
+			str += v.String()
+		}
+	}
+	return str
+}
+
+func (c *composeFile) GenerateFile(path string) error {
+	fp, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer fp.Close()
+
+	fp.Write([]byte(c.String()))
+	return nil
 }
