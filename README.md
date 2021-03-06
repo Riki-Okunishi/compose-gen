@@ -34,14 +34,14 @@ import "github.com/Riki-Okunishi/compose-gen/compose"
 func main() {
     yml := compose.NewComposeFile("3.5")
 
-    yml.Service("app").Build("./build/path")
-    yml.Service("app").Volumes("./volume1/local:./volume1/container", "./volume2/local:./volume2/container")
-    yml.Service("app").Ports("10080:80", "10081:81")
+    yml.Services("app").Build("./build/path")
+    yml.Services("app").Volumes("./volume1/local:./volume1/container", "./volume2/local:./volume2/container")
+    yml.Services("app").Ports("10080:80", "10081:81")
 
     web := yml.Services("web")
     web.Image("nginx:1.18-alpine")
     web.Ports(map[string]interface{}{"target": 80, "published": 8080, "protocol": "tcp", "mode": "host"})
-    
+
 }
 ```
 
