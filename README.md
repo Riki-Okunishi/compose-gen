@@ -36,7 +36,8 @@ func main() {
 
     yml.Services("app").Build("./build/path")
     yml.Services("app").Volumes("./volume1/local:./volume1/container", "./volume2/local:./volume2/container")
-    yml.Services("app").Ports("10080:80", "10081:81")
+    yml.Services("app").Ports("80:10080", "81:10081")
+    yml.Services("app").Ports(compose.PortsShortSyntax("82:10082"))
 
     web := yml.Services("web")
     web.Image("nginx:1.18-alpine")

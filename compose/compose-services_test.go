@@ -97,3 +97,24 @@ func TestServicesPortsArgumentsType(t *testing.T) {
 		t.Errorf("Error: Failed to add a correct ports: value as long syntax %v", plsList)
 	}
 }
+
+func TestPortsSyntax(t *testing.T) {
+	yml := compose.NewDefaultComposeFile()
+	app := yml.Services("app")
+
+	if err := app.Ports(compose.PortsLongSyntax(80, 8080, "tcp", "host")); err != nil {
+		t.Errorf("Error: Failed to add ports: value as long syntax %v", err)
+	}
+
+	if err := app.Ports(compose.PortsLongSyntax(80, 8080, "tcp", "host"), compose.PortsLongSyntax(81, 8081, "tcp", "host")); err != nil {
+		t.Errorf("Error: Failed to add ports: value as long syntax %v", err)
+	}
+
+	if err := app.Ports(compose.PortsShortSyntax("80:8080")); err != nil {
+		t.Errorf("Error: Failed to add ports: value as short syntax %v", err)
+	}
+
+	if err := app.Ports(compose.PortsShortSyntax("80:8080"), compose.PortsShortSyntax("81:8081")); err != nil {
+		t.Errorf("Error: Failed to add ports: value as short syntax %v", err)
+	}
+}

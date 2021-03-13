@@ -37,6 +37,9 @@ type portsShortSyntax struct {
 	ports      string
 }
 
+// PortsSyntax describes Long or Short syntax of ports: value
+type PortsSyntax func(*service)
+
 var (
 	_ serviceEditor = &service{}
 	_ valueSyntax   = &portsLongSyntax{}
@@ -55,9 +58,9 @@ func newService(n string, v string) serviceEditor {
 	}
 }
 
-/*func (s *service) GetName() string {
-	return s.name
-}*/
+func (s *service) applyPortsValue(value PortsSyntax) {
+	value(s)
+}
 
 func (s *service) Build(b string) error {
 	// TODO: Validate whether b is dir path
@@ -96,13 +99,13 @@ func (s *service) Ports(arg interface{}, args ...interface{}) error {
 			}
 			s.ports = append(s.ports, pss)
 		}
+		return nil
 	case map[string]interface{}:
 		pls, err := newPortsLongSyntax(v)
 		if err != nil {
 			return err
 		}
 		s.ports = append(s.ports, pls)
-
 	case []map[string]interface{}:
 		if len(args) > 0 {
 			return fmt.Errorf("Error: invalid argument args %v", args)
@@ -114,9 +117,32 @@ func (s *service) Ports(arg interface{}, args ...interface{}) error {
 			}
 			s.ports = append(s.ports, pls)
 		}
-
+		return nil
+	case PortsSyntax:
+		s.applyPortsValue(v)
 	default:
 		return fmt.Errorf("Error: invalid argument arg %v", arg)
+	}
+
+	for i, argi := range args {
+		switch v := argi.(type) {
+		case string:
+			pss, err := newPortsShortSyntax(v)
+			if err != nil {
+				return err
+			}
+			s.ports = append(s.ports, pss)
+		case map[string]interface{}:
+			pls, err := newPortsLongSyntax(v)
+			if err != nil {
+				return err
+			}
+			s.ports = append(s.ports, pls)
+		case PortsSyntax:
+			s.applyPortsValue(v)
+		default:
+			return fmt.Errorf("Error: invalid argument args[%d]", i)
+		}
 	}
 	return nil
 }
@@ -236,4 +262,20 @@ func newPortsShortSyntax(ports string) (*portsShortSyntax, error) {
 
 func (p *portsShortSyntax) String() string {
 	return fmt.Sprintf("\"%s\"\n", p.ports)
+}
+
+// PortsLongSyntax adds ports: values to service
+func PortsLongSyntax(target uint, published uint, protocol string, mode string) PortsSyntax {
+	return func(s *service) {
+		pl := &portsLongSyntax{target: target, published: published, protocol: protocol, mode: mode}
+		s.ports = append(s.ports, pl)
+	}
+}
+
+// PortsShortSyntax adds ports: value to service
+func PortsShortSyntax(ports string) PortsSyntax {
+	return func(s *service) {
+		ps := &portsShortSyntax{ports: ports}
+		s.ports = append(s.ports, ps)
+	}
 }
