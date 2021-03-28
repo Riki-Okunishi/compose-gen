@@ -43,12 +43,10 @@ func main() {
     web.Image("nginx:1.18-alpine")
     web.Ports(map[string]interface{}{"target": 80, "published": 8080, "protocol": "tcp", "mode": "host"})
 
-    yml.GenerateFile("docker-compose.yml")
-
 }
 ```
 
-This code will generate the following file as `docker-compose.yml`.
+The code in `example/main.go` will generate the following file as `docker-compose.yml`.
 
 ```yml
 version: "3.5"
