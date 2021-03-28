@@ -43,7 +43,42 @@ func main() {
     web.Image("nginx:1.18-alpine")
     web.Ports(map[string]interface{}{"target": 80, "published": 8080, "protocol": "tcp", "mode": "host"})
 
+    yml.GenerateFile("docker-compose.yml")
+
 }
+```
+
+This code will generate the following file as `docker-compose.yml`.
+
+```yml
+version: "3.5"
+services:
+  app:
+    build: ./build/app
+    ports:
+      - "10080:80"
+    volumes:
+      - ./volumes:/mounted
+    depends_on:
+      - web
+  web:
+    image: nginx:1.18-alpine
+    ports:
+      - target: 80
+        published: 8080
+        protocol: tcp
+        mode: host
+    volumes:
+      - ./volumes:/mounted
+      - ./web/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - db
+  db:
+    build: ./build/mysql
+    volumes:
+      - db-store:/var/lib/mysql
+volumes:
+  db-store:
 ```
 
 ### Output
